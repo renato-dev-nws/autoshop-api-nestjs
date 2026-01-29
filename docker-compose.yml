@@ -1,0 +1,74 @@
+name: vehicles-shop-api-nestjs
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: vehicles-shop-postgres-nestjs
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vehicles_shop
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vehicles-shop-network-nestjs
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: vehicles-shop-redis-nestjs
+    ports:
+      - "6379:6379"
+    networks:
+      - vehicles-shop-network-nestjs
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: vehicles-shop-api-nestjs
+    ports:
+      - "8080:8080"
+      - "9229:9229"  # Debug port
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: vehicles_shop
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_EXPIRES_IN: 24h
+      PORT: 8080
+      NODE_ENV: development
+      FIPE_BASE_URL: https://parallelum.com.br/fipe/api/v1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vehicles-shop-network-nestjs
+    volumes:
+      - ./src:/app/src
+      - ./uploads:/app/uploads
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+
+networks:
+  vehicles-shop-network-nestjs:
+    driver: bridge
