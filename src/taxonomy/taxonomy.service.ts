@@ -15,6 +15,7 @@ import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
+import { PaginationDto, PaginatedResponse } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class TaxonomyService {
@@ -95,8 +96,25 @@ export class TaxonomyService {
 
   // ==================== BRANDS ====================
 
-  async findAllBrands(): Promise<Brand[]> {
-    return this.brandRepository.find({ order: { name: 'ASC' } });
+  async findAllBrands(pagination: PaginationDto): Promise<PaginatedResponse<Brand>> {
+    const { page = 1, page_size = 20 } = pagination;
+    const skip = (page - 1) * page_size;
+
+    const [data, total] = await this.brandRepository.findAndCount({
+      order: { name: 'ASC' },
+      take: page_size,
+      skip,
+    });
+
+    return {
+      data,
+      pagination: {
+        page,
+        page_size,
+        total,
+        total_pages: Math.ceil(total / page_size),
+      },
+    };
   }
 
   async findOneBrand(id: number): Promise<Brand> {
@@ -169,11 +187,26 @@ export class TaxonomyService {
 
   // ==================== MODELS ====================
 
-  async findAllModels(): Promise<VehicleModel[]> {
-    return this.modelRepository.find({
+  async findAllModels(pagination: PaginationDto): Promise<PaginatedResponse<VehicleModel>> {
+    const { page = 1, page_size = 20 } = pagination;
+    const skip = (page - 1) * page_size;
+
+    const [data, total] = await this.modelRepository.findAndCount({
       relations: ['brand'],
       order: { name: 'ASC' },
+      take: page_size,
+      skip,
     });
+
+    return {
+      data,
+      pagination: {
+        page,
+        page_size,
+        total,
+        total_pages: Math.ceil(total / page_size),
+      },
+    };
   }
 
   async findOneModel(id: number): Promise<VehicleModel> {

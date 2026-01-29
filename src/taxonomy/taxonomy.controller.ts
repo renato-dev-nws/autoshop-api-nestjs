@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ import { UpdateBrandDto } from './dto/update-brand.dto';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Controller('admin')
 @ApiTags('Taxonomy (Admin)')
@@ -87,10 +89,10 @@ export class TaxonomyController {
   // ==================== BRANDS ====================
 
   @Get('brands')
-  @ApiOperation({ summary: 'Listar todas as marcas' })
-  @ApiResponse({ status: 200, description: 'Lista de marcas' })
-  async findAllBrands() {
-    return this.taxonomyService.findAllBrands();
+  @ApiOperation({ summary: 'Listar todas as marcas (paginado)' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de marcas' })
+  async findAllBrands(@Query() pagination: PaginationDto) {
+    return this.taxonomyService.findAllBrands(pagination);
   }
 
   @Get('brands/:id')
@@ -138,10 +140,10 @@ export class TaxonomyController {
   // ==================== MODELS ====================
 
   @Get('models')
-  @ApiOperation({ summary: 'Listar todos os modelos' })
-  @ApiResponse({ status: 200, description: 'Lista de modelos' })
-  async findAllModels() {
-    return this.taxonomyService.findAllModels();
+  @ApiOperation({ summary: 'Listar todos os modelos (paginado)' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de modelos' })
+  async findAllModels(@Query() pagination: PaginationDto) {
+    return this.taxonomyService.findAllModels(pagination);
   }
 
   @Get('models/:id')

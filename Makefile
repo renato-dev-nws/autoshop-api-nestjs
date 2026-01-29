@@ -1,7 +1,7 @@
 .PHONY: help install build start dev stop restart logs clean seed db-shell api-shell test lint format docker-rebuild
 
 # Variáveis
-DOCKER_COMPOSE := docker-compose -f docker-compose.dev.yml
+DOCKER_COMPOSE := docker-compose
 DOCKER_COMPOSE_PROD := docker-compose
 
 # Comando padrão: mostra ajuda
